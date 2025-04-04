@@ -8,11 +8,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using MySql.Data.MySqlClient;
+
 
 namespace cadastrodeclientes
 {
     public partial class frmCadastrodeClientes : Form
     {
+        //Conexão com o banco de dados MySQL
+        MySqlConnection Conexao;
+        string data_source = "datasource=localhost; username=root; password=; database=db_cadastro";
         public frmCadastrodeClientes()
         {
             InitializeComponent();
@@ -81,15 +86,67 @@ namespace cadastrodeclientes
                     return; //Impede o prosseguimento se algum campo estiver vazio
                 }
 
+                //Cria a conexão com o banco de dados
+                Conexao = new MySqlConnection(data_source);
+                Conexao.Open();
+
+                //Teste de abertura de banco de dados
+               // MessageBox.Show("Conexão aberta com sucesso");
+
+                //Comando SQL para inserir um cliente no banco de dados
+                MySqlCommand cmd = new MySqlCommand
+                {
+                    Connection = Conexao
+                };
+
+                cmd.Prepare();
+
+                cmd.CommandText = "INSERT INTO dadosdecliente(nomecompleto, nomesocial, email, cpf)" +
+                    "VALUES (@nomecompleto, @nomesocial, @email, @cpf)";
+
+                //Adiciona os parâmetros com os dados do formulário
+                cmd.Parameters.AddWithValue("@nomecompleto", txtNomeCompleto.Text.Trim());
+                cmd.Parameters.AddWithValue("@nomesocial", txtNomeSocial.Text.Trim());
+                cmd.Parameters.AddWithValue("@email", email);
+                cmd.Parameters.AddWithValue("@cpf", cpf);
+
+                // Executa o comando de Inserção no banco
+                cmd.ExecuteNonQuery();
+
+                // mensagem de sucesso
+                MessageBox.Show("Contato Inserido com sucesso: ",
+                    "Sucesso",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
+            }
+            catch (MySqlException ex )
+            {
+                //Trata erros relacionados ao MySQL
+                MessageBox.Show("Erro " + ex.Number + " ocorreu: " + ex.Message,
+                    "Erro",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                //Trata outros ipos de erro
+                //Trata outros tipos de erro * erros no backEnd do formulário
                 MessageBox.Show("Ocorreu: " + ex.Message,
                     "Erro",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
 
+            }
+            finally
+            {
+                //Garante que a conexão com o banco será fechada, mesmo se ocorrer erro
+                if(Conexao != null && Conexao.State == ConnectionState.Open)
+                {
+                    Conexao.Close();
+
+                    //Teste de fechamento do banco
+                    //MessageBox.Show("Conexão fechada com sucesso");
+                }
             }
         }
     }
