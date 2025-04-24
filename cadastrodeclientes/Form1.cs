@@ -308,6 +308,8 @@ namespace cadastrodeclientes
         {
             ListView.SelectedListViewItemCollection clientedaselecao = lstCliente.SelectedItems;
 
+            btnExcluirCliente.Visible = true;
+
             foreach(ListViewItem item in clientedaselecao)
             {
                 codigo_cliente = Convert.ToInt32(item.SubItems[0].Text);
@@ -331,7 +333,12 @@ namespace cadastrodeclientes
 
         private void btnNovoCliente_Click(object sender, EventArgs e)
         {
-           //Limpa todos os campos, evitando que ocorra a substituição de dados de outro cliente (UPDATE) e criando um novo cliente(cadastro)
+            zerar_formulario();
+        }
+
+        private void zerar_formulario()
+        {
+            //Limpa todos os campos, evitando que ocorra a substituição de dados de outro cliente (UPDATE) e criando um novo cliente(cadastro)
 
             codigo_cliente = null;
 
@@ -341,8 +348,9 @@ namespace cadastrodeclientes
             txtCPF.Text = " ";
 
             txtNomeCompleto.Focus();
-        }
 
+            btnExcluirCliente.Visible = false;
+        }
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
         {
             excluir_cliente();
@@ -387,6 +395,10 @@ namespace cadastrodeclientes
                         MessageBoxIcon.Information);
 
                     carregar_clientes();
+
+                    zerar_formulario();
+
+                  
                 }
             }
             catch (MySqlException ex)
